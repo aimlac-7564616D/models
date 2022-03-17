@@ -5,16 +5,16 @@ Read in API forecast and output hourly solar power production predictions
 for the next 24 between 23:00 and 23:00
 Based on SLIMJAB
 """
-
-from dotenv import load_dotenv
-import os
-import pvlib as pv
-import pandas as pd
-from met_office_api import get_forecast
 from dataclasses import dataclass
-import numpy as np
+from datetime import datetime
+from flask import current_app
 from scipy.integrate import quad
 from scipy.interpolate import interp1d
+
+import numpy as np
+import os
+import pandas as pd
+import pvlib as pv
 
 @dataclass
 class SolarArray():
@@ -222,36 +222,58 @@ def predict_solar(
     return power_generated
 
 
-def get_solar_prediction() -> pd.DataFrame:
+def cut_frame(frame: pd.DataFrame) -> pd.DataFrame:
+    """Cut a dataframe on the DateTime column into intervals of 23:00 - 23:00.
+
+    Cuts a given Pandas DataFrame via a string DateTime column into an interval
+    of 23:00 - 23:00.
+
+    Args:
+        frame (pd.DataFrame): Pandas dataframe to be cut. Must contain a DataTime
+            column.
+
+    Returns: pd.DataFrame: Pandas dataframe cut into intervals of 23:00 - 23:00
+    """
+    datetime_format = current_app.config['DATETIME_FORMAT']
+    hrs = []
+    for i in range(len(frame["time"])):
+        hrs.append(datetime.strptime(frame["time"][i], datetime_format).hour)
+    idxs = np.where(np.asarray(hrs) == 23)[0]
+    start = idxs[0]
+    end = idxs[1] 
+    return frame.truncate(start, end)
+
+
+def get_solar_prediction(forecast: pd.DataFrame) -> pd.DataFrame:
     """Get the predicted Solar Panel output. 
     
     Returns the predicted solar array output in W for next 23:00 - 23:00 interval, 
     in 60 min steps.
     
+    Args:
+        forecast (dict): Forcast dataframe.
+    
     Returns: pd.DataFrame: The predicted solar energy output of solar array over the 
     next 24 hours.
     """
-
-    load_dotenv(dotenv_path="composer/.env")
+    forecast = cut_frame(forecast)
 
     # set panel / location parameters
-    LATITUDE = os.environ.get("LOCATION_LAT")
-    LONGITUDE = os.environ.get("LOCATION_LON")
-    TIMEZONE = "Europe/London"
-    ALTITUDE = 250.0  # m above sea level
-    PANEL_TILT = 45.0  # angle panels are tilted at (south facing)
-    ARRAY_AREA = 50.0 * 50.0  # area covered by array in m^2
-    BASE_EFFICIENCY = 0.196  # base efficiency of panels
-    PMPP = -0.0037  # %/C
-    PMAX_ARRAY = 469_000  # W
+    latitude = current_app.config['LATITUDE']
+    longitude = current_app.config['LONGITUDE']
+    timezone = current_app.config['TIMEZONE']
+    altitude = current_app.config['ALTITUDE']
+    panel_tilt = current_app.config['PANEL_TILT']
+    array_area = current_app.config['ARRAY_AREA']
+    base_efficiency = current_app.config['BASE_EFFICIENCY']
+    pmpp = current_app.config['PMPP']
+    pmax_array = current_app.config['PMAX_ARRAY']
     
-    # forecast = get_forecast() # get forecast from MetOffice API
-    forecast = get_forecast()
     aimlac_location = pv.location.Location(
-        float(LATITUDE), float(LONGITUDE), tz=TIMEZONE, altitude=ALTITUDE
+        float(latitude), float(longitude), tz=timezone, altitude=altitude
     )  # define location of solar panel installation
     aimlac_solar_array = SolarArray(
-        ARRAY_AREA, PANEL_TILT, BASE_EFFICIENCY, PMPP, PMAX_ARRAY
+        array_area, panel_tilt, base_efficiency, pmpp, pmax_array
     )  # create SolarArray object to describe aimlacHQ solar panel array
     predicted_solar_output = predict_solar(
         forecast, aimlac_location, aimlac_solar_array
@@ -259,7 +281,3 @@ def get_solar_prediction() -> pd.DataFrame:
     predicted_solar_output["SolarPower"] /= 1000. # convert to kW
 
     return predicted_solar_output
-
-
-if __name__ == "__main__":
-    get_solar_prediction()

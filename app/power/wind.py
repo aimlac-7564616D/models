@@ -4,16 +4,16 @@ Read in API forecast and output hourly wind power production predictions
 for the next 24 between 23:00 and 23:00
 Based on SLIMJAB
 """
+from app.models import wind_model
 
-import os
-import pickle as p
+from datetime import datetime
+from flask import current_app
 from typing import Union
 
 import numpy as np
+import os
 import pandas as pd
-
-from met_office_api import get_forecast
-
+import pickle as p
 
 def get_wind_speed(forecast: pd.DataFrame) -> pd.DataFrame:
     """Unpacks wind speed from forecast.
@@ -47,10 +47,7 @@ def get_wind_power(windspeed: Union[list, np.ndarray, pd.Series, float],
     """
 
     n_turbines = 6  # Number of active turbines
-
-    model_path = "models/powerPrediction/model.p"
     hellman_exp = 0.34  # Hellman exponent for static air above inhabited areas
-    assert os.path.isfile(model_path)  # Assert model exists
     assert isinstance(windspeed, (list, np.ndarray, float, pd.Series))
     assert isinstance(height, (int, float))
 
@@ -61,26 +58,46 @@ def get_wind_power(windspeed: Union[list, np.ndarray, pd.Series, float],
 
     correction = (height / 10)**hellman_exp  # Terrain/height correction
 
-    with open(model_path, 'rb') as file:  # Load model from pickle
-        model = p.load(file)
-
     windspeed *= correction
     windspeed[windspeed >= 30] = 30  # Truncate excess speeds
-    return n_turbines * model(windspeed)
+    return n_turbines * wind_model(windspeed)
 
 
-def get_wind_prediction()->pd.DataFrame:
+def cut_frame(frame: pd.DataFrame) -> pd.DataFrame:
+    """Cut a dataframe on the DateTime column into intervals of 23:00 - 23:00.
+
+    Cuts a given Pandas DataFrame via a string DateTime column into an interval
+    of 23:00 - 23:00.
+
+    Args:
+        frame (pd.DataFrame): Pandas dataframe to be cut. Must contain a DataTime
+            column.
+
+    Returns: pd.DataFrame: Pandas dataframe cut into intervals of 23:00 - 23:00
+    """
+    datetime_format = current_app.config['DATETIME_FORMAT']
+    hrs = []
+    for i in range(len(frame["time"])):
+        hrs.append(datetime.strptime(frame["time"][i], datetime_format).hour)
+    idxs = np.where(np.asarray(hrs) == 23)[0]
+    start = idxs[0]
+    end = idxs[1] 
+    return frame.truncate(start, end)
+
+
+def get_wind_prediction(forecast: pd.DataFrame)->pd.DataFrame:
     """Wrapper function to return array of predicted wind power generation for forecast timesteps.
+    
+    Args:
+        forecast (dict): Forcast dataframe.
+
     Returns:
         wind_report (pd.DataFrame): The wind speed and predicted wind energy output of wind turbines over the 
     next 24 hours, in 30 minute intervals (48 instances).
     """
-    ALTITUDE = 250.0  # m above sea level
-    forecast = get_forecast()
+    altitude = current_app.config['ALTITUDE']
+    forecast = cut_frame(forecast)
     wind_speed = get_wind_speed(forecast)
-    wind_power = get_wind_power(wind_speed["windSpeed10m"], ALTITUDE)
+    wind_power = get_wind_power(wind_speed["windSpeed10m"], altitude)
     wind_report = pd.DataFrame(data={"time": wind_speed["time"], "WindSpeed": wind_speed["windSpeed10m"], "WindPower": wind_power})
     return wind_report
-
-if __name__ == "__main__":
-    get_wind_prediction()
