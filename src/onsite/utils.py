@@ -1,3 +1,4 @@
+# copied from the SLIMJaB repository
 """Various helper functions to calculate the energy demand of the building.
 
 Todo:

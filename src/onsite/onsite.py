@@ -1,3 +1,4 @@
+# copied from the SLIMJaB repository
 """This file contains functions that return the energy demand of the office site."""
 
 import datetime

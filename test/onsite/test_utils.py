@@ -1,3 +1,4 @@
+# copied from the SLIMJaB repository
 """Tests to ensure office energy utility functions are working correctly.
 
 Todo:
