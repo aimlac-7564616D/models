@@ -1,4 +1,4 @@
-from src.demand.demand import get_energy_demand
+from src.onsite.onsite import get_energy_demand
 from src.solar.solar import get_solar_prediction
 from src.wind.wind import get_wind_prediction
 
@@ -35,8 +35,8 @@ def predict_wind():
         return {"message": str(e)}, 500
 
 
-@bp.route("/predict-demand", methods=["POST"])
-def predict_demand():
+@bp.route("/predict-onsite", methods=["POST"])
+def predict_onsite():
     try:
         forecast_json = get(request.json, "features[0].properties.timeSeries")
         forecast_df = pd.read_json(json.dumps(forecast_json))

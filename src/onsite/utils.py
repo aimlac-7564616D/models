@@ -1,4 +1,3 @@
-# copied from the SLIMJaB repository
 """Various helper functions to calculate the energy demand of the building.
 
 Todo:
@@ -75,21 +74,19 @@ def temp_to_energy(temp: int) -> int:
     return (-6 * temp) + 90
 
 
-def get_temperatures(forecast) -> List[int]:
+def get_temperatures(forecast: pd.DataFrame) -> List[int]:
     """Get the tempreture of the site for the next 24 hours.
 
     Get the temperature of the site for the next 24 hours in 30 minute
     intervals. Currently a dummy function.
 
+    Args:
+        forecast (dict): Forcast dataframe.
+
     Returns: List[int]: The temperature in celsius of the site for the next 24
         hours in 30 minute intervals (48 instances).
     """
-    # fergus: commenting out this to decouple the module
-    # added a function parameter by the same name to make this (hopefully)
-    # useable
-    # forecast = get_forecast()
-
-    temperatures = forecast["T"].to_numpy(dtype="float")
+    temperatures = forecast["screenTemperature"].to_numpy(dtype="float")
     if len(temperatures) == 49:
         temperatures = temperatures[:-1]
     return temperatures.tolist()

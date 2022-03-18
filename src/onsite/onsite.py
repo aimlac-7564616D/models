@@ -1,4 +1,3 @@
-# copied from the SLIMJaB repository
 """This file contains functions that return the energy demand of the office site."""
 
 import datetime
@@ -7,11 +6,12 @@ import pandas as pd
 
 from typing import List
 
+from src.common import interp_30min
 from src.onsite.utils import get_temperatures, temp_to_energy, adjust_datetime
 from src.onsite.utils import create_initial_demand_dataframe, get_active_office_mask
 
-
 def get_energy_demand(
+    forecast: pd.DataFrame,
     start_time=datetime.datetime.now().replace(hour=23, minute=0, second=0)
 ) -> pd.DataFrame:
     """Get the energy demand for the building.
@@ -20,18 +20,24 @@ def get_energy_demand(
     in 30 minute intervals.
 
     Args:
+        forecast (dict): Forcast dataframe.
         start_time (datetime.datetime): The datetime to start predicting building demand from.
 
     Returns: pd.DataFrame: The total energy demand for the building over the next
         24 hours, in 30 minute intervals (48 instances).
     """
+    forecast = interp_30min(forecast)
     start_time = adjust_datetime(start_time)
 
     demand_dataframe = create_initial_demand_dataframe(start_time)
 
     active_office_mask = get_active_office_mask(start_time)
 
-    demand_dataframe["Heating"] = get_heating_demand(active_office_mask)
+    temperatures_over_coming_24_hours, heating_demand = get_heating_demand(
+        forecast, active_office_mask
+    )
+    demand_dataframe["Heating"] = heating_demand
+    demand_dataframe["HQ Temperature"] = temperatures_over_coming_24_hours
     demand_dataframe["Data Centre"] = get_data_centre_demand()
     demand_dataframe["Office Equipment"] = get_office_equipment_demand(
         active_office_mask
@@ -50,20 +56,21 @@ def get_energy_demand(
     return demand_dataframe
 
 
-def get_heating_demand(active_office_mask: List[bool]) -> np.ndarray:
+def get_heating_demand(forecast: pd.DataFrame, active_office_mask: List[bool]) -> np.ndarray:
     """Get the energy demands for the building's heating system.
 
     Returns a numpy array of the energy demands of the heating system over
     the next 24 hours, in 30 minute intervals.
 
     Args:
+        forecast (dict): Forcast dataframe.
         active_office_mask (List[bool]): An array of boolean values corresponding to whether
                                          people are in the office or not.
 
     Returns: np.ndarray: The energy demands of the heating system over the next
         24 hours, in 30 minute intervals (48 instances).
     """
-    temperatures_over_coming_24_hours = get_temperatures()
+    temperatures_over_coming_24_hours = get_temperatures(forecast)
     heating_demand = np.zeros(48)
     for index, _ in enumerate(heating_demand):
         if active_office_mask[index]:
@@ -71,7 +78,7 @@ def get_heating_demand(active_office_mask: List[bool]) -> np.ndarray:
                 temperatures_over_coming_24_hours[index]
             )
 
-    return heating_demand
+    return temperatures_over_coming_24_hours, heating_demand
 
 
 def get_data_centre_demand() -> np.ndarray:

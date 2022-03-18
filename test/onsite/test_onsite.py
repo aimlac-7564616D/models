@@ -33,10 +33,10 @@ def test_get_data_centre_demand() -> None:
     assert sum(output) <= 9600
     assert sum(output) >= 0
 
-@pytest.mark.skip(reason="This makes an API query. We're not testing if the API is available, need to inject some sample data.")
-def test_get_energy_demand() -> None:
+
+def test_get_energy_demand(timeseries) -> None:
     """Test to get the energy demand of the entire building."""
-    output = get_energy_demand()
+    output = get_energy_demand(timeseries)
 
     assert isinstance(output, pd.DataFrame)
 
@@ -44,7 +44,8 @@ def test_get_energy_demand() -> None:
     assert output.shape[0] == 48
 
     # assert columns
-    assert output.shape[1] == 7
+    # assert output.shape[1] == 7
+    assert output.shape[1] == 8 # added a column: HQ Temperature
 
     assert "Active office mask" in output
     assert "Heating" in output
@@ -52,6 +53,7 @@ def test_get_energy_demand() -> None:
     assert "Office Equipment" in output
     assert "LightingOther" in output
     assert "Total demand" in output
+    assert "HQ Temperature" in output
 
     assert isinstance(output["Active office mask"][0], np.bool_)
     assert isinstance(output["Heating"][0], float)
@@ -69,10 +71,13 @@ def test_get_energy_demand() -> None:
     ).all()
 
 
-@pytest.mark.skip(reason="TypeError: get_office_equipment_demand() missing 1 required positional argument: 'active_office_mask'")
-def test_get_office_equipment_demand():
+@pytest.mark.parametrize(
+    "active_office_mask",
+    ([False, ] * 20 + [True, ] * 16 + [False, ] * 12, )
+)
+def test_get_office_equipment_demand(active_office_mask):
     """Test to ensure office cumulative office demand is the expected result."""
-    output = get_office_equipment_demand()
+    output = get_office_equipment_demand(active_office_mask)
 
     # Check return type
     assert isinstance(output, np.ndarray)
@@ -83,10 +88,14 @@ def test_get_office_equipment_demand():
     assert sum(output) == 160
 
 
+@pytest.mark.parametrize(
+    "active_office_mask",
+    ([False, ] * 20 + [True, ] * 16 + [False, ] * 12, )
+)
 @pytest.mark.skip(reason="TypeError: get_office_equipment_demand() missing 1 required positional argument: 'active_office_mask'")
-def test_get_lighting_and_other_demand():
+def test_get_lighting_and_other_demand(active_office_mask):
     """Test to ensure lighting and misc demand is the expected result."""
-    output = get_lighting_and_other_demand()
+    output = get_lighting_and_other_demand(active_office_mask)
 
     # Check return type
     assert isinstance(output, np.ndarray)
