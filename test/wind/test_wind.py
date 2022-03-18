@@ -64,5 +64,5 @@ def test_get_wind_prediction(timeseries):
     )
 
     result = get_wind_prediction(timeseries)
-    assert all(result.WindSpeed == expected_wind_speed)
-    assert all(result.WindPower == expected_wind_power)
+    assert all(np.isclose(result.WindSpeed, expected_wind_speed))
+    assert all(np.isclose(result.WindPower, expected_wind_power))

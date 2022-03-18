@@ -34,4 +34,4 @@ def test_get_solar_prediction(timeseries):
         ]
     )
     result = get_solar_prediction(timeseries)
-    assert all(result["SolarPower"] == expected)
+    assert all(np.isclose(result["SolarPower"], expected))
