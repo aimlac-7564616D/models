@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - 'main'
-      - 'fergus/docker-workflow'
 
 jobs:
   docker:
@@ -27,7 +26,6 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           # build for x86 and arm
-          # can't seem to build arm since node:alpine does not support ??
-          platforms: linux/amd64 #,linux/armv7
+          platforms: linux/amd64,linux/armv7
           push: true
           tags: dustpancake/aimlac-cc-models:latest
