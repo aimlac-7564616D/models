@@ -16,8 +16,9 @@ import os
 import pandas as pd
 import pvlib as pv
 
+
 @dataclass
-class SolarArray():
+class SolarArray:
     """Class to represent a solar panel array.
 
     Attributes:
@@ -28,6 +29,7 @@ class SolarArray():
         pmax (float): Maximum total output of solar array in Watts.
 
     """
+
     array_area: float
     panel_tilt: float
     base_efficiency: float
@@ -178,7 +180,7 @@ def get_generated_power(
         hours_since_23, output_power
     )  # interpolate power into function of time
     generated_power = []
-    for i in range(len(hours_since_23) -1):
+    for i in range(len(hours_since_23) - 1):
         lower_limit = hours_since_23[i]
         upper_limit = hours_since_23[i + 1]
         integral = quad(
@@ -187,7 +189,7 @@ def get_generated_power(
         generated_power.append(integral[0])  # Watts/hr
     generated_power.append(0.0)  # 23:00 - 00:00 interval needs a value for array shapes
 
-    return pd.DataFrame(data={"time": datetimes, "SolarPower":generated_power})
+    return pd.DataFrame(data={"time": datetimes, "SolarPower": generated_power})
 
 
 def predict_solar(
@@ -234,41 +236,41 @@ def cut_frame(frame: pd.DataFrame) -> pd.DataFrame:
 
     Returns: pd.DataFrame: Pandas dataframe cut into intervals of 23:00 - 23:00
     """
-    datetime_format = current_app.config['DATETIME_FORMAT']
+    datetime_format = current_app.config["DATETIME_FORMAT"]
     hrs = []
     for i in range(len(frame["time"])):
         hrs.append(datetime.strptime(frame["time"][i], datetime_format).hour)
     idxs = np.where(np.asarray(hrs) == 23)[0]
     start = idxs[0]
-    end = idxs[1] 
+    end = idxs[1]
     return frame.truncate(start, end)
 
 
 def get_solar_prediction(forecast: pd.DataFrame) -> pd.DataFrame:
-    """Get the predicted Solar Panel output. 
-    
-    Returns the predicted solar array output in W for next 23:00 - 23:00 interval, 
+    """Get the predicted Solar Panel output.
+
+    Returns the predicted solar array output in W for next 23:00 - 23:00 interval,
     in 60 min steps.
-    
+
     Args:
         forecast (dict): Forcast dataframe.
-    
-    Returns: pd.DataFrame: The predicted solar energy output of solar array over the 
+
+    Returns: pd.DataFrame: The predicted solar energy output of solar array over the
     next 24 hours.
     """
     forecast = cut_frame(forecast)
 
     # set panel / location parameters
-    latitude = current_app.config['LATITUDE']
-    longitude = current_app.config['LONGITUDE']
-    timezone = current_app.config['TIMEZONE']
-    altitude = current_app.config['ALTITUDE']
-    panel_tilt = current_app.config['PANEL_TILT']
-    array_area = current_app.config['ARRAY_AREA']
-    base_efficiency = current_app.config['BASE_EFFICIENCY']
-    pmpp = current_app.config['PMPP']
-    pmax_array = current_app.config['PMAX_ARRAY']
-    
+    latitude = current_app.config["LATITUDE"]
+    longitude = current_app.config["LONGITUDE"]
+    timezone = current_app.config["TIMEZONE"]
+    altitude = current_app.config["ALTITUDE"]
+    panel_tilt = current_app.config["PANEL_TILT"]
+    array_area = current_app.config["ARRAY_AREA"]
+    base_efficiency = current_app.config["BASE_EFFICIENCY"]
+    pmpp = current_app.config["PMPP"]
+    pmax_array = current_app.config["PMAX_ARRAY"]
+
     aimlac_location = pv.location.Location(
         float(latitude), float(longitude), tz=timezone, altitude=altitude
     )  # define location of solar panel installation
@@ -278,6 +280,6 @@ def get_solar_prediction(forecast: pd.DataFrame) -> pd.DataFrame:
     predicted_solar_output = predict_solar(
         forecast, aimlac_location, aimlac_solar_array
     )  # calculate predicted solar output from forecast, location and array parameters
-    predicted_solar_output["SolarPower"] /= 1000. # convert to kW
+    predicted_solar_output["SolarPower"] /= 1000.0  # convert to kW
 
     return predicted_solar_output
