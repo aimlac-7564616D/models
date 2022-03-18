@@ -4,9 +4,9 @@ on:
   pull_request:
     branches:
       - main
-    #paths:
-    #  - '**.py'
-    #  - 'setup.cfg'
+    paths:
+      - '**.py'
+      - 'setup.cfg'
 
 jobs:
   pytest:
@@ -30,6 +30,8 @@ jobs:
       run: |
         echo "Test Coverage Report Summary:" > cov.txt
         echo "\`\`\`" >> cov.txt
+        echo "Name                     Stmts   Miss  Cover" >> cov.txt
+        echo "--------------------------------------------" >> cov.txt
         LOCATION_LAT=52.1051 LOCATION_LON=-3.6680 pytest --cov=src . | grep TOTAL >> cov.txt
         echo "\`\`\`" >> cov.txt
     - name: Comment coverage
