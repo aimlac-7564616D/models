@@ -103,7 +103,7 @@ def get_wind_prediction(forecast: pd.DataFrame) -> pd.DataFrame:
         wind_report (pd.DataFrame): The wind speed and predicted wind energy output of wind turbines over the
     next 24 hours, in 30 minute intervals (48 instances).
     """
-    altitude = current_app.config["ALTITUDE"]
+    altitude = config.ALTITUDE
     forecast = cut_frame(forecast)
     wind_speed = get_wind_speed(forecast)
     wind_power = get_wind_power(wind_speed["windSpeed10m"], altitude)
