@@ -1,3 +1,4 @@
+from src.demand.demand import get_energy_demand
 from src.solar.solar import get_solar_prediction
 from src.wind.wind import get_wind_prediction
 
@@ -30,5 +31,23 @@ def predict_wind():
         wind_report_df = get_wind_prediction(forecast_df)
         wind_report_json = wind_report_df.to_json(orient="records")
         return wind_report_json
+    except Exception as e:
+        return {"message": str(e)}, 500
+
+
+@bp.route("/predict-demand", methods=["POST"])
+def predict_demand():
+    try:
+        forecast_json = get(request.json, "features[0].properties.timeSeries")
+        forecast_df = pd.read_json(json.dumps(forecast_json))
+        demand_df = get_energy_demand(forecast_df)
+        demand_df.rename(columns={
+            "DateTime": "time",
+            "HQ Temperature": "HQTemperature",
+            "Total demand": "HQPowerDemand"
+        }, inplace=True)
+        demand_df = demand_df[["time", "HQPowerDemand", "HQTemperature"]]
+        demand_json = demand_df.to_json(orient="records")
+        return demand_json
     except Exception as e:
         return {"message": str(e)}, 500

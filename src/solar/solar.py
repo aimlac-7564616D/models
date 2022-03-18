@@ -15,6 +15,7 @@ import os
 import pandas as pd
 import pvlib as pv
 
+from src.common import interp_30min
 import src.config as config
 
 
@@ -176,7 +177,7 @@ def get_generated_power(
     output_power[
         output_power > max_array_output
     ] = max_array_output  # cap power output at max power output of array
-    hours_since_23 = np.linspace(0, 24, 25)
+    hours_since_23 = np.linspace(0, 24, 49)
     power_curve = interp1d(
         hours_since_23, output_power
     )  # interpolate power into function of time
@@ -225,28 +226,6 @@ def predict_solar(
     return power_generated
 
 
-def cut_frame(frame: pd.DataFrame) -> pd.DataFrame:
-    """Cut a dataframe on the DateTime column into intervals of 23:00 - 23:00.
-
-    Cuts a given Pandas DataFrame via a string DateTime column into an interval
-    of 23:00 - 23:00.
-
-    Args:
-        frame (pd.DataFrame): Pandas dataframe to be cut. Must contain a DataTime
-            column.
-
-    Returns: pd.DataFrame: Pandas dataframe cut into intervals of 23:00 - 23:00
-    """
-    datetime_format = config.DATETIME_FORMAT
-    hrs = []
-    for i in range(len(frame["time"])):
-        hrs.append(datetime.strptime(frame["time"][i], datetime_format).hour)
-    idxs = np.where(np.asarray(hrs) == 23)[0]
-    start = idxs[0]
-    end = idxs[1]
-    return frame.truncate(start, end)
-
-
 def get_solar_prediction(forecast: pd.DataFrame) -> pd.DataFrame:
     """Get the predicted Solar Panel output.
 
@@ -259,7 +238,7 @@ def get_solar_prediction(forecast: pd.DataFrame) -> pd.DataFrame:
     Returns: pd.DataFrame: The predicted solar energy output of solar array over the
     next 24 hours.
     """
-    forecast = cut_frame(forecast)
+    forecast = interp_30min(forecast)
 
     # set panel / location parameters
     latitude = config.LATITUDE
@@ -283,4 +262,4 @@ def get_solar_prediction(forecast: pd.DataFrame) -> pd.DataFrame:
     )  # calculate predicted solar output from forecast, location and array parameters
     predicted_solar_output["SolarPower"] /= 1000.0  # convert to kW
 
-    return predicted_solar_output
+    return predicted_solar_output.iloc[:-1]

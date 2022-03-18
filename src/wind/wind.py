@@ -12,6 +12,7 @@ import os
 import pandas as pd
 import pickle as p
 
+from src.common import interp_30min
 import src.config as config
 
 # load model
@@ -71,28 +72,6 @@ def get_wind_power(
     return n_turbines * wind_model(windspeed)
 
 
-def cut_frame(frame: pd.DataFrame) -> pd.DataFrame:
-    """Cut a dataframe on the DateTime column into intervals of 23:00 - 23:00.
-
-    Cuts a given Pandas DataFrame via a string DateTime column into an interval
-    of 23:00 - 23:00.
-
-    Args:
-        frame (pd.DataFrame): Pandas dataframe to be cut. Must contain a DataTime
-            column.
-
-    Returns: pd.DataFrame: Pandas dataframe cut into intervals of 23:00 - 23:00
-    """
-    datetime_format = config.DATETIME_FORMAT
-    hrs = []
-    for i in range(len(frame["time"])):
-        hrs.append(datetime.strptime(frame["time"][i], datetime_format).hour)
-    idxs = np.where(np.asarray(hrs) == 23)[0]
-    start = idxs[0]
-    end = idxs[1]
-    return frame.truncate(start, end)
-
-
 def get_wind_prediction(forecast: pd.DataFrame) -> pd.DataFrame:
     """Wrapper function to return array of predicted wind power generation for forecast timesteps.
 
@@ -104,7 +83,7 @@ def get_wind_prediction(forecast: pd.DataFrame) -> pd.DataFrame:
     next 24 hours, in 30 minute intervals (48 instances).
     """
     altitude = config.ALTITUDE
-    forecast = cut_frame(forecast)
+    forecast = interp_30min(forecast)
     wind_speed = get_wind_speed(forecast)
     wind_power = get_wind_power(wind_speed["windSpeed10m"], altitude)
     wind_report = pd.DataFrame(
@@ -114,4 +93,4 @@ def get_wind_prediction(forecast: pd.DataFrame) -> pd.DataFrame:
             "WindPower": wind_power,
         }
     )
-    return wind_report
+    return wind_report.iloc[:-1]
