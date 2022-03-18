@@ -26,6 +26,8 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           # build for x86 and arm
-          platforms: linux/amd64,linux/armv7
+          # not supporting arm for now as it takes a long time to build
+          # and since the other docker images can't build for arm, there's not point
+          platforms: linux/amd64 #,linux/armv7
           push: true
           tags: dustpancake/aimlac-cc-models:latest
