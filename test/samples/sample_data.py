@@ -1,3 +1,4 @@
+# sample time series from MetOffice API
 sample_time_series = [
     {
         "time": "2022-03-18T19:00Z",
