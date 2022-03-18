@@ -25,4 +25,4 @@ jobs:
         pip install pytest
     - name: Run unit tests
       run: |
-        pytest -vvv .
+        LOCATION_LAT=52.1051 LOCATION_LON=-3.6680 pytest -vvv .
