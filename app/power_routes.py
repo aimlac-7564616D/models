@@ -1,7 +1,7 @@
-from app.power.solar import get_solar_prediction
-from app.power.wind import get_wind_prediction
+from src.solar.solar import get_solar_prediction
+from src.wind.wind import get_wind_prediction
 
-from flask import Blueprint, current_app, request
+from flask import Blueprint, request
 from pydash.objects import get
 
 import json

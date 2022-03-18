@@ -4,16 +4,22 @@ Read in API forecast and output hourly wind power production predictions
 for the next 24 between 23:00 and 23:00
 Based on SLIMJAB
 """
-from app.models import wind_model
-
 from datetime import datetime
-from flask import current_app
 from typing import Union
 
 import numpy as np
 import os
 import pandas as pd
 import pickle as p
+
+import src.config as config
+
+# load model
+root = os.path.dirname(__file__)
+
+wind_model = None
+with open(os.path.join(root, "wind_model.pkl"), "rb") as f:
+    wind_model = p.load(f)
 
 
 def get_wind_speed(forecast: pd.DataFrame) -> pd.DataFrame:
@@ -77,7 +83,7 @@ def cut_frame(frame: pd.DataFrame) -> pd.DataFrame:
 
     Returns: pd.DataFrame: Pandas dataframe cut into intervals of 23:00 - 23:00
     """
-    datetime_format = current_app.config["DATETIME_FORMAT"]
+    datetime_format = config.DATETIME_FORMAT
     hrs = []
     for i in range(len(frame["time"])):
         hrs.append(datetime.strptime(frame["time"][i], datetime_format).hour)

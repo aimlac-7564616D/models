@@ -7,7 +7,6 @@ Based on SLIMJAB
 """
 from dataclasses import dataclass
 from datetime import datetime
-from flask import current_app
 from scipy.integrate import quad
 from scipy.interpolate import interp1d
 
@@ -15,6 +14,8 @@ import numpy as np
 import os
 import pandas as pd
 import pvlib as pv
+
+import src.config as config
 
 
 @dataclass
@@ -236,7 +237,7 @@ def cut_frame(frame: pd.DataFrame) -> pd.DataFrame:
 
     Returns: pd.DataFrame: Pandas dataframe cut into intervals of 23:00 - 23:00
     """
-    datetime_format = current_app.config["DATETIME_FORMAT"]
+    datetime_format = config.DATETIME_FORMAT
     hrs = []
     for i in range(len(frame["time"])):
         hrs.append(datetime.strptime(frame["time"][i], datetime_format).hour)
@@ -261,15 +262,15 @@ def get_solar_prediction(forecast: pd.DataFrame) -> pd.DataFrame:
     forecast = cut_frame(forecast)
 
     # set panel / location parameters
-    latitude = current_app.config["LATITUDE"]
-    longitude = current_app.config["LONGITUDE"]
-    timezone = current_app.config["TIMEZONE"]
-    altitude = current_app.config["ALTITUDE"]
-    panel_tilt = current_app.config["PANEL_TILT"]
-    array_area = current_app.config["ARRAY_AREA"]
-    base_efficiency = current_app.config["BASE_EFFICIENCY"]
-    pmpp = current_app.config["PMPP"]
-    pmax_array = current_app.config["PMAX_ARRAY"]
+    latitude = config.LATITUDE
+    longitude = config.LONGITUDE
+    timezone = config.TIMEZONE
+    altitude = config.ALTITUDE
+    panel_tilt = config.PANEL_TILT
+    array_area = config.ARRAY_AREA
+    base_efficiency = config.BASE_EFFICIENCY
+    pmpp = config.PMPP
+    pmax_array = config.PMAX_ARRAY
 
     aimlac_location = pv.location.Location(
         float(latitude), float(longitude), tz=timezone, altitude=altitude

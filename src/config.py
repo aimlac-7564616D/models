@@ -1,6 +1,4 @@
-from os import environ, urandom
-
-SECRET_KEY = urandom(1024)
+from os import environ
 
 DATETIME_FORMAT = "%Y-%m-%dT%H:%MZ"
 LATITUDE = environ.get("LOCATION_LAT")
