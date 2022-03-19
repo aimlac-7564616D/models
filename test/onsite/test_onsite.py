@@ -92,7 +92,7 @@ def test_get_office_equipment_demand(active_office_mask):
     "active_office_mask",
     ([False, ] * 20 + [True, ] * 16 + [False, ] * 12, )
 )
-@pytest.mark.skip(reason="TypeError: get_office_equipment_demand() missing 1 required positional argument: 'active_office_mask'")
+#@pytest.mark.skip(reason="TypeError: get_office_equipment_demand() missing 1 required positional argument: 'active_office_mask'")
 def test_get_lighting_and_other_demand(active_office_mask):
     """Test to ensure lighting and misc demand is the expected result."""
     output = get_lighting_and_other_demand(active_office_mask)
