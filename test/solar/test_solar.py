@@ -53,7 +53,7 @@ def test_get_solar_prediction(timeseries):
             0.0,
             0.0,
             0.0,
-            0.0
+            0.0,
         ]
     )
     result = get_solar_prediction(timeseries)

@@ -45,7 +45,7 @@ def test_get_energy_demand(timeseries) -> None:
 
     # assert columns
     # assert output.shape[1] == 7
-    assert output.shape[1] == 8 # added a column: HQ Temperature
+    assert output.shape[1] == 8  # added a column: HQ Temperature
 
     assert "Active office mask" in output
     assert "Heating" in output
@@ -73,7 +73,20 @@ def test_get_energy_demand(timeseries) -> None:
 
 @pytest.mark.parametrize(
     "active_office_mask",
-    ([False, ] * 20 + [True, ] * 16 + [False, ] * 12, )
+    (
+        [
+            False,
+        ]
+        * 20
+        + [
+            True,
+        ]
+        * 16
+        + [
+            False,
+        ]
+        * 12,
+    ),
 )
 def test_get_office_equipment_demand(active_office_mask):
     """Test to ensure office cumulative office demand is the expected result."""
@@ -90,9 +103,22 @@ def test_get_office_equipment_demand(active_office_mask):
 
 @pytest.mark.parametrize(
     "active_office_mask",
-    ([False, ] * 20 + [True, ] * 16 + [False, ] * 12, )
+    (
+        [
+            False,
+        ]
+        * 20
+        + [
+            True,
+        ]
+        * 16
+        + [
+            False,
+        ]
+        * 12,
+    ),
 )
-#@pytest.mark.skip(reason="TypeError: get_office_equipment_demand() missing 1 required positional argument: 'active_office_mask'")
+# @pytest.mark.skip(reason="TypeError: get_office_equipment_demand() missing 1 required positional argument: 'active_office_mask'")
 def test_get_lighting_and_other_demand(active_office_mask):
     """Test to ensure lighting and misc demand is the expected result."""
     output = get_lighting_and_other_demand(active_office_mask)

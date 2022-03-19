@@ -10,9 +10,10 @@ from src.common import interp_30min
 from src.onsite.utils import get_temperatures, temp_to_energy, adjust_datetime
 from src.onsite.utils import create_initial_demand_dataframe, get_active_office_mask
 
+
 def get_energy_demand(
     forecast: pd.DataFrame,
-    start_time=datetime.datetime.now().replace(hour=23, minute=0, second=0)
+    start_time=datetime.datetime.now().replace(hour=23, minute=0, second=0),
 ) -> pd.DataFrame:
     """Get the energy demand for the building.
 
@@ -56,7 +57,9 @@ def get_energy_demand(
     return demand_dataframe
 
 
-def get_heating_demand(forecast: pd.DataFrame, active_office_mask: List[bool]) -> np.ndarray:
+def get_heating_demand(
+    forecast: pd.DataFrame, active_office_mask: List[bool]
+) -> np.ndarray:
     """Get the energy demands for the building's heating system.
 
     Returns a numpy array of the energy demands of the heating system over

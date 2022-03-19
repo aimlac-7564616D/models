@@ -5,6 +5,7 @@ import pandas as pd
 
 import src.config as config
 
+
 def interp_30min(frame: pd.DataFrame) -> pd.DataFrame:
     """Interpolates hourly weather report into 30-min intervals.
 
@@ -26,17 +27,19 @@ def interp_30min(frame: pd.DataFrame) -> pd.DataFrame:
     end_dt = start_dt.replace(day=start_dt.day + 1)
     assert end_dt < frame.time.max(), "not enough data"
 
-    frame = frame.set_index('time')
+    frame = frame.set_index("time")
     frame = frame[start_dt:end_dt]
-    frame = frame.asfreq('30min')
-    
+    frame = frame.asfreq("30min")
+
     disc_cols = ["significantWeatherCode", "uvIndex"]
     cont_cols = list(set(frame.columns) - set(disc_cols))
-    
+
     frame[cont_cols] = frame[cont_cols].interpolate()
     frame[disc_cols] = frame[disc_cols].ffill()
     frame = frame.reset_index()
-    frame.time = frame.time.map(lambda dt: datetime.strftime(dt, config.DATETIME_FORMAT))
+    frame.time = frame.time.map(
+        lambda dt: datetime.strftime(dt, config.DATETIME_FORMAT)
+    )
     return frame
 
 
