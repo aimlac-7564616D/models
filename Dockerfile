@@ -5,12 +5,11 @@ RUN apk update && apk upgrade
 RUN pip3 install --upgrade pip
 
 WORKDIR /app
-COPY . .
 
 # install dependencies
 RUN apk add g++ gcc gfortran hdf5 hdf5-dev openblas-dev
 # for the database connector
-RUN apk add install libmariadb3 libmariadb-dev
+RUN apk add install mariadb-connector-c-dev
 RUN pip3 install -r requirements.txt
 
 EXPOSE 5000
