@@ -12,6 +12,7 @@ RUN apk add mariadb-connector-c mariadb-connector-c-dev
 
 COPY . .
 RUN pip3 install -r requirements.txt
+RUN pip3 install mariadb
 
 EXPOSE 5000
 
