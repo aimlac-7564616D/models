@@ -84,7 +84,7 @@ def get_price_estimate(forecast) -> Tuple[str, int, float]:
     #   delta = (date - dt.datetime.now()).days * 48 + period
     #   delta > 2 * 48
     #
-    # so a 2 day period?
+    # so a 24 hour = 48 * 30 minute period ?
     #
     #  if (delta > 2*48):
     #      price = 'NaN'
