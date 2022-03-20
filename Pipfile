@@ -16,6 +16,7 @@ scipy = "==1.8.0"
 Flask = "==2.0.3"
 Flask-Cors = "==3.0.10"
 mariadb = "*"
+scikit-learn = "*"
 
 [dev-packages]
 black = "*"
