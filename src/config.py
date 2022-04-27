@@ -1,5 +1,8 @@
 from os import environ
 
+AIMLAC_RSE_ADDR = environ.get("AIMLAC_RSE_ADDR")
+AIMLAC_RSE_KEY = environ.get("AIMLAC_RSE_KEY")
+
 DATETIME_FORMAT = "%Y-%m-%dT%H:%MZ"
 LATITUDE = environ.get("LOCATION_LAT")
 LONGITUDE = environ.get("LOCATION_LON")
