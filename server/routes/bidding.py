@@ -28,7 +28,7 @@ def set_bids():
             bidder = request.json.get("bidder", "default")
         else:
             bidder = "default"
-        resp = BIDDERS[bidder]()
+        resp = BIDDERS.get(bidder, BIDDERS["default"])()
         return resp.json()
     except Exception as e:
         return {"message": str(e)}, 500
