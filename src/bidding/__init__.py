@@ -1,2 +1,2 @@
 from src.bidding.util import BIDDERS
-from src.bidding import bogo_bidder
+from src.bidding import bogo_bidder, slimjab_bidder

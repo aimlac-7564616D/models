@@ -14,7 +14,6 @@ import random
         # input will be processed into a pd.DataFrame can be accessed in the function
         "energy": 'SELECT time FROM energy_onsite WHERE time > "{start_date}" AND time < "{end_date}"'
     },
-    default=True,
 )
 def bogo_bidder(**kwargs):
     """Example of bidder function."""
