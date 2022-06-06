@@ -54,7 +54,7 @@ def register_bidder(name, *, args={}, data=None, default=False):
 
 
 # make predictions 2 days ahead so that the bids are accepted
-def get_output_template(dt: date = date.today() + timedelta(days=2)):
+def get_output_template(dt: date = date.today() + timedelta(days=1)):
     """Create an empty output DataFrame with following columns:
 
     hour_ID: int (1-24)
@@ -69,7 +69,7 @@ def get_output_template(dt: date = date.today() + timedelta(days=2)):
     # create template
     data = []
     for i in range(9, 33):
-        applying_date = dt + timedelta(days=1) if i > 24 else dt
+        applying_date = dt + timedelta(days=1) if i > 23 else dt
         hour_ID = (i % 24) + 1
         data.append((hour_ID, applying_date, 0.0, 0.0, "BUY"))
     df = pd.DataFrame(data=data, columns=cols)
