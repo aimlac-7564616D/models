@@ -31,7 +31,7 @@ def slimjab_bidder(**kwargs):
             power.loc[f"{time}:00:00", "NetPower"]
             + power.loc[f"{time}:30:00", "NetPower"]
         ) / 2
-        df.loc[i, "volume"] = volume
+        df.loc[i, "volume"] = np.abs(volume)
         df.loc[i, "price"] = (
             random.random() * 100 + 100
         )  # random values between 100 - 200
