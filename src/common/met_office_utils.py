@@ -23,9 +23,10 @@ def interp_30min(frame: pd.DataFrame) -> pd.DataFrame:
     assert "time" in frame.columns, "no timestamp"
     frame.time = pd.to_datetime(frame.time, format=config.DATETIME_FORMAT)
     frame.time = frame.time.map(lambda dt: dt.replace(minute=0, second=0))
-    start_dt = frame.time.min().replace(hour=23)
+    start_dt = frame.time.min().replace(hour=0)
+    start_dt = start_dt.replace(day=start_dt.day + 1)
     end_dt = start_dt.replace(day=start_dt.day + 1)
-    assert end_dt < frame.time.max(), "not enough data"
+    assert end_dt <= frame.time.max(), "not enough data"
 
     frame = frame.set_index("time")
     frame = frame[start_dt:end_dt]

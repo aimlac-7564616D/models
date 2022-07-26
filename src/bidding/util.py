@@ -1,9 +1,11 @@
-from datetime import date, datetime, timedelta
-from flask import g
 import json
+from datetime import date, datetime, timedelta
+
 import pandas as pd
-import src.config as config
 import requests
+from flask import g
+
+import src.config as config
 
 BIDDERS = {}
 
@@ -67,11 +69,7 @@ def get_output_template(dt: date = date.today() + timedelta(days=1)):
     """
     cols = ["hour_ID", "applying_date", "volume", "price", "type"]
     # create template
-    data = []
-    for i in range(9, 33):
-        applying_date = dt + timedelta(days=1) if i > 23 else dt
-        hour_ID = (i % 24) + 1
-        data.append((hour_ID, applying_date, 0.0, 0.0, "BUY"))
+    data = [(hour, dt, 0.0, 0.0, "BUY") for hour in range(1, 25)]
     df = pd.DataFrame(data=data, columns=cols)
     df["applying_date"] = df["applying_date"].map(lambda d: d.isoformat())
     return df
