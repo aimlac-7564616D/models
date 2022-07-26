@@ -1,8 +1,10 @@
+import random
 from datetime import date, datetime, timedelta
-from src.bidding.util import register_bidder, get_output_template
+
 import numpy as np
 import pandas as pd
-import random
+
+from src.bidding.util import get_output_template, register_bidder
 
 
 @register_bidder(
@@ -31,7 +33,7 @@ def slimjab_bidder(**kwargs):
             power.loc[f"{time}:00:00", "NetPower"]
             + power.loc[f"{time}:30:00", "NetPower"]
         ) / 2
-        df.loc[i, "volume"] = volume
+        df.loc[i, "volume"] = abs(volume)
         df.loc[i, "price"] = (
             random.random() * 100 + 100
         )  # random values between 100 - 200
