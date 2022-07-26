@@ -5,14 +5,15 @@
 """
 
 import datetime as dt
+import pickle
 from typing import List, Tuple
 
+import numpy as np
 import pandas as pd
 
 # need this to unpack the pickles
 import sklearn
-
-import pickle
+from flask import g
 
 m_model_p = None
 # Load autobidder ML model
@@ -103,6 +104,7 @@ def get_price_forecast(forecast) -> list:
     """
 
     dates = set(forecast["settlementDate"])
+    print(dates)
 
     outputs = {}
     for date in dates:
@@ -123,3 +125,31 @@ def get_price_forecast(forecast) -> list:
         outputs[date] = prices
 
     return pd.DataFrame(outputs)
+
+
+def predict_price_tomorrow():
+    conn = g.get_conn()
+    today = dt.date.today()
+    tomorrow = today + dt.timedelta(days=1)
+    yesterday = today - dt.timedelta(days=1)
+
+    query = 'SELECT * FROM {table_name} WHERE settlementDate = "{date}";'
+    elexonB0620 = pd.read_sql(
+        query.format(table_name="elexonB0620", date=yesterday),
+        conn,
+    )
+    elexonB1620 = pd.read_sql(
+        query.format(table_name="elexonB1620", date=yesterday),
+        conn,
+    )
+    forecast = prepare_data_frame(elexonB0620, elexonB1620)
+    forecast.settlementDate += 2
+    forecast = get_price_forecast(forecast)
+    series = pd.Series(
+        data=np.round(forecast.values.ravel(), 2),
+        index=pd.to_datetime(
+            [f"{tomorrow} {i//2:02d}:{(i%2)*30:02d}:00" for i in range(48)]
+        ),
+        name="price",
+    )
+    return series.to_frame()
