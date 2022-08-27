@@ -37,8 +37,8 @@ def co2_saved() -> pd.DataFrame:
         data['power'].time[i] = t
 
     data = pd.merge(data["co2"],data["power"], on = 'time', how='inner')
-        
-    data = data.iloc[-1]
+    if len(data):
+        data = data.iloc[-1, :]
 
     netPower = data.wind1 + data.wind2 + data.wind3 + data.wind4 + data.windA + data.windB + data.solar
 
