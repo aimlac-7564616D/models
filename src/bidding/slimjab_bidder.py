@@ -41,8 +41,7 @@ def slimjab_bidder(**kwargs):
             + power.loc[f"{time}:30:00", "NetPower"]
         ) / 2
         estimatedPrice = (
-            price.loc[f"{time}:00:00", "price"]
-            + price.loc[f"{time}:30:00", "price"]
+            price.loc[f"{time}:00:00", "price"] + price.loc[f"{time}:30:00", "price"]
         ) / 2
         df.loc[i, "volume"] = abs(volume)
         df.loc[i, "price"] = estimatedPrice
