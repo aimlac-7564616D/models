@@ -16,7 +16,7 @@ def predict_price_tomorrow(price_df):
     )
     price_df = price_df.set_index("datetime").asfreq("H").ffill()
     price_tmr = price_df[["price"]].copy()
-    price_tmr.index = price_tmr.index + timedelta(days=1)
+    price_tmr.index = price_tmr.index + timedelta(days=2)
     price_tmr.price = np.round(price_df.price.values @ w + b, 2)
     price_tmr = price_tmr.reset_index()
     price_tmr.columns = ["time", "price"]
