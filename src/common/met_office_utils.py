@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import numpy as np
 import pandas as pd
@@ -24,8 +24,8 @@ def interp_30min(frame: pd.DataFrame) -> pd.DataFrame:
     frame.time = pd.to_datetime(frame.time, format=config.DATETIME_FORMAT)
     frame.time = frame.time.map(lambda dt: dt.replace(minute=0, second=0))
     start_dt = frame.time.min().replace(hour=0)
-    start_dt = start_dt.replace(day=start_dt.day + 1)
-    end_dt = start_dt.replace(day=start_dt.day + 1)
+    start_dt = start_dt + timedelta(days=1)
+    end_dt = start_dt + timedelta(days=1)
     assert end_dt <= frame.time.max(), "not enough data"
 
     frame = frame.set_index("time")
