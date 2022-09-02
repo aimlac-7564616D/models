@@ -23,7 +23,6 @@ def slimjab_bidder(**kwargs):
     power = kwargs["power"].set_index("time")
     price = kwargs["price"].set_index("time")
     df = get_output_template()
-    print(power, price, df)
     for i in range(len(df)):
         time = np.datetime64(
             f'{df.loc[i, "applying_date"]} {str(df.loc[i, "hour_ID"] - 1).zfill(2)}'
