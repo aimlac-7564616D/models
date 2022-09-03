@@ -24,8 +24,9 @@ def parse_data(data, kwargs):
     assert isinstance(data, dict), f"expect a `dict`, got: {type(data)}"
     parsed_data = {}
     conn = g.get_conn()
+    resolved_kwargs = {k: v() if callable(v) else v for k, v in kwargs.items()}
     for key, query in data.items():
-        parsed_data[key] = pd.read_sql(query.format(**kwargs), conn)
+        parsed_data[key] = pd.read_sql(query.format(**resolved_kwargs), conn)
     return parsed_data
 
 

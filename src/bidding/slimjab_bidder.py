@@ -10,8 +10,8 @@ from src.bidding.util import get_output_template, register_bidder
 @register_bidder(
     "slimjab-bidder",
     args={
-        "start_date": date.today() - timedelta(days=1),
-        "end_date": date.today() + timedelta(days=2),
+        "start_date": lambda: date.today() - timedelta(days=1),
+        "end_date": lambda: date.today() + timedelta(days=2),
     },
     data={
         "power": 'SELECT time, (WindPower + SolarPower - HQPowerDemand) * 1000 AS NetPower FROM powerPrediction WHERE time > "{start_date}" AND time < "{end_date}"',
@@ -27,7 +27,6 @@ def slimjab_bidder(**kwargs):
         time = np.datetime64(
             f'{df.loc[i, "applying_date"]} {str(df.loc[i, "hour_ID"] - 1).zfill(2)}'
         )
-        print(f"{time}:00:00", f"{time}:00:00" in power.index)
         if (
             not f"{time}:00:00" in power.index
             or not f"{time}:30:00" in power.index
